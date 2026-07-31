@@ -49,12 +49,12 @@ def parse_pdf(file_bytes: bytes) -> tuple[str, int]:
                 continue
 
         full_text = "\n\n".join(page_texts)
-        return full_text, total_pages
+        return full_text, total_pages, page_texts
     finally:
         doc.close()
 
 
-def parse_docx(file_bytes: bytes) -> tuple[str, None]:
+def parse_docx(file_bytes: bytes) -> tuple[str, None, list[str]]:
     """
     Parses DOCX file bytes using python-docx.
     
@@ -64,7 +64,7 @@ def parse_docx(file_bytes: bytes) -> tuple[str, None]:
         file_bytes (bytes): Raw bytes of the DOCX file.
         
     Returns:
-        tuple[str, None]: A tuple containing (extracted_text, None).
+        tuple[str, None, list[str]]: A tuple containing (extracted_text, None, paragraphs).
         
     Raises:
         ValueError: If file is empty, corrupted, or not a valid DOCX document.
@@ -85,4 +85,4 @@ def parse_docx(file_bytes: bytes) -> tuple[str, None]:
             paragraphs.append(text)
 
     full_text = "\n\n".join(paragraphs)
-    return full_text, None
+    return full_text, None, paragraphs

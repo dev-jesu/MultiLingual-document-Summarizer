@@ -14,9 +14,22 @@ class Settings(BaseSettings):
     UPLOAD_DIRECTORY: str = "uploads"
     ALLOWED_EXTENSIONS: set[str] = {".pdf", ".docx"}
 
-    # Future Pipeline Scaffolding
+    # Gemini API Configuration (Free Tier)
     GEMINI_API_KEY: str = ""
-    MAX_TOKENS_PER_CHUNK: int = 8000
+    MODEL_NAME: str = "gemini-2.5-flash-lite"
+    
+    # Token & Chunking Limits
+    MAX_INPUT_TOKENS: int = 6000
+    MAX_OUTPUT_TOKENS: int = 1024
+    TARGET_SUMMARY_WORDS: int = 500
+    CHUNK_OVERLAP: int = 150
+    DEFAULT_CHUNK_STRATEGY: str = "merged"
+    DEFAULT_MAX_TOKENS: int = 6000
+    DEFAULT_CHUNK_OVERLAP: int = 150
+
+    # Retry & Timeout Configuration
+    MAX_RETRIES: int = 3
+    REQUEST_TIMEOUT: float = 60.0
 
     model_config = SettingsConfigDict(
         env_file=".env",

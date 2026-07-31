@@ -134,8 +134,8 @@ curl -X 'POST' \
 ---
 
 ## Development Roadmap
-- [x] **Stage 1 (Current)**: Document parsing, validation, chunking scaffolding, and `/upload` endpoint.
-- [ ] **Stage 2**: Text cleaning, pre-processing, and Chunking Engine integration.
+- [x] **Stage 1**: Document parsing, validation, chunking scaffolding, and `/upload` endpoint.
+- [x] **Stage 2 (Current)**: Text cleaning, legal pre-processing, and Chunking Engine integration.
 - [ ] **Stage 3**: Gemini LLM summarization pipeline integration.
 - [ ] **Stage 4**: Multilingual translation (English ↔ Tamil).
 - [ ] **Stage 5**: OCR support for scanned documents, PDF generation, persistence, and queue system.

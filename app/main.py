@@ -2,18 +2,19 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from app.config import settings
-from app.routers import upload
+from app.routers import upload, summarize
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="Scalable FastAPI backend for processing and summarizing Indian District Court legal documents.",
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
 )
 
 # Register routers
 app.include_router(upload.router)
+app.include_router(summarize.router)
 
 
 @app.get("/", tags=["Health Check"])
@@ -24,7 +25,7 @@ async def root():
     return {
         "status": "online",
         "app_name": settings.APP_NAME,
-        "stage": "Stage 1 - Document Parsing Core",
+        "stage": "Stage 3 - Gemini LLM Summarization Pipeline",
         "docs": "/docs"
     }
 

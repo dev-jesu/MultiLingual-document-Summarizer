@@ -1,9 +1,8 @@
 def estimate_tokens(text: str, chars_per_token: float = 4.0) -> int:
     """
-    Provider-independent token estimator.
+    Fast, provider-independent token count estimator based on character length heuristics.
     
-    Estimates token count based on character length heuristics. Standard rule of thumb
-    for English legal text is ~4 characters per token.
+    Standard rule of thumb for English legal text is ~4 characters per token.
     
     Args:
         text (str): Input text string.
@@ -14,7 +13,13 @@ def estimate_tokens(text: str, chars_per_token: float = 4.0) -> int:
     """
     if not text:
         return 0
-        
-    # Heuristic ratio: len(text) / chars_per_token
     estimated = int(len(text) / chars_per_token)
     return max(1, estimated)
+
+def estimate_word_count(text: str) -> int:
+    """
+    Calculates word count of a text string.
+    """
+    if not text:
+        return 0
+    return len(text.split())
