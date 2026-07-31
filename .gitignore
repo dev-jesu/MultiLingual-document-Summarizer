@@ -44,3 +44,8 @@ uploads/*
 !uploads/.gitkeep
 temp/
 cache/
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env*
