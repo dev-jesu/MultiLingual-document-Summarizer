@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     MAX_RETRIES: int = 3
     REQUEST_TIMEOUT: float = 60.0
 
+    # Multilingual Support
+    DEFAULT_SOURCE_LANGUAGE: str = "auto"
+    DEFAULT_TARGET_LANGUAGE: str = "en"
+    SUPPORTED_LANGUAGES: str = "en,ta"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

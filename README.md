@@ -7,13 +7,16 @@ Currently implemented: **Stage 1 (Backend Core & Parsing Infrastructure)**.
 
 ---
 
-## Features (Stage 1)
+## Features (Stage 4)
 - **Document Parsing API**: Fast, reliable text extraction from PDF and DOCX documents via `POST /upload`.
 - **PyMuPDF Parser**: Page-by-page PDF processing with error resilience for unreadable or corrupted pages.
 - **Python-Docx Parser**: Clean paragraph extraction for Word documents.
 - **Robust Validation**: File extension validation, maximum file size check (100 MB), empty file detection, corrupted file detection, and encrypted PDF detection.
 - **Modular Architecture**: Clean architecture organized into routers, schemas, services, and utilities.
 - **Chunking Scaffolding**: Prepared chunking and token estimation utilities for future AI pipeline stages.
+- **Multilingual Summarization**: Supports English, Tamil, Hindi, Telugu, Kannada, Malayalam, and Marathi document summarization with optional source/target language overrides.
+- **Lightweight Language Detection**: Automatically recognizes supported Indian languages and can be overridden manually when needed.
+- **Translation Pipeline**: Summarizes in the source language first and translates the summary only when the requested target language differs.
 
 ---
 
@@ -95,6 +98,45 @@ Interactive API documentation (Swagger UI) is available at:
 ---
 
 ## API Documentation
+
+### POST `/summarize`
+
+Accepts a multipart file upload (`.pdf` or `.docx`) and returns a multilingual legal summary.
+
+#### Supported Languages
+- `en` for English
+- `ta` for Tamil
+- `hi` for Hindi
+- `te` for Telugu
+- `kn` for Kannada
+- `ml` for Malayalam
+- `mr` for Marathi
+- `auto` for automatic source-language detection
+
+#### Request Parameters
+- `file`: uploaded document
+- `source_language`: optional, one of `auto`, `en`, `ta`
+- `target_language`: required, one of `en`, `ta`
+
+#### Example Curl Request
+```bash
+curl -X 'POST' \
+  'http://127.0.0.1:8000/summarize' \
+  -H 'accept: application/json' \
+  -F 'file=@judgement.pdf;type=application/pdf' \
+  -F 'source_language=auto' \
+  -F 'target_language=ta'
+```
+
+#### Translation Workflow
+- English document → English summary → Tamil summary when `target_language=ta`
+- Tamil document → Tamil summary → English summary when `target_language=en`
+- The system avoids translating the full document when a summary-only translation is sufficient.
+
+#### Language Detection Behavior
+- English and Tamil are detected using lightweight heuristics.
+- Mixed-language content returns a clear validation error.
+- Unsupported values for `source_language` or `target_language` return a `400` response.
 
 ### POST `/upload`
 

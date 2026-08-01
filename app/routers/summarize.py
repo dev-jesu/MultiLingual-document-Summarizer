@@ -1,8 +1,9 @@
 from pathlib import Path
-from fastapi import APIRouter, File, UploadFile, HTTPException, status
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException, status
 from app.config import settings
 from app.schemas.summary import SummaryResponse
 from app.schemas.upload import ErrorDetail
+from app.services.language_detection import MixedLanguageError, UnsupportedLanguageError, normalize_language_parameters
 from app.services.parser import parse_pdf, parse_docx
 from app.services.summary_service import SummaryService
 from app.utils.logger import logger
@@ -20,7 +21,11 @@ router = APIRouter(tags=["Document Summarization"])
         500: {"model": ErrorDetail, "description": "Internal server error during document processing or API failure"}
     }
 )
-async def summarize_document(file: UploadFile = File(...)) -> SummaryResponse:
+async def summarize_document(
+    file: UploadFile = File(...),
+    source_language: str = Form(default=settings.DEFAULT_SOURCE_LANGUAGE),
+    target_language: str = Form(default=settings.DEFAULT_TARGET_LANGUAGE),
+) -> SummaryResponse:
     """
     Handles file upload, input validation, text extraction, and summarization pipeline.
     """
@@ -62,9 +67,9 @@ async def summarize_document(file: UploadFile = File(...)) -> SummaryResponse:
     # 1. Parse Document
     try:
         if file_ext == ".pdf":
-            raw_text, pages = parse_pdf(contents)
+            raw_text, pages, _ = parse_pdf(contents)
         elif file_ext == ".docx":
-            raw_text, pages = parse_docx(contents)
+            raw_text, pages, _ = parse_docx(contents)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -82,14 +87,33 @@ async def summarize_document(file: UploadFile = File(...)) -> SummaryResponse:
             detail="An unexpected error occurred while parsing the document."
         )
 
+    try:
+        normalized_source, normalized_target = normalize_language_parameters(source_language, target_language)
+    except (UnsupportedLanguageError, ValueError) as exc:
+        logger.warning(f"Invalid language parameters for {file.filename}: {exc}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    logger.info(
+        "Summarization request for %s | source_language=%s | target_language=%s",
+        file.filename,
+        normalized_source,
+        normalized_target,
+    )
+
     # 2. Summarize Document
     try:
         result = SummaryService.summarize_document(
             filename=file.filename,
             raw_text=raw_text,
-            pages=pages
+            pages=pages,
+            source_language=normalized_source,
+            target_language=normalized_target,
         )
         return SummaryResponse(**result)
+    except MixedLanguageError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except UnsupportedLanguageError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     except ValueError as val_err:
         # Configuration error (e.g., missing API key)
         raise HTTPException(

@@ -1,7 +1,3 @@
-from app.prompts.summary_prompt import (
-    LEGAL_SINGLE_PASS_PROMPT,
-    LEGAL_CHUNK_PROMPT,
-    LEGAL_COMBINE_PROMPT,
-)
+from app.prompts.summary_prompt import build_summary_prompt
 
-__all__ = ["LEGAL_SINGLE_PASS_PROMPT", "LEGAL_CHUNK_PROMPT", "LEGAL_COMBINE_PROMPT"]
+__all__ = ["build_summary_prompt"]
