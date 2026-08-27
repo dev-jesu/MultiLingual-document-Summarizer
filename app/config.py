@@ -34,7 +34,13 @@ class Settings(BaseSettings):
     # Multilingual Support
     DEFAULT_SOURCE_LANGUAGE: str = "auto"
     DEFAULT_TARGET_LANGUAGE: str = "en"
-    SUPPORTED_LANGUAGES: str = "en,ta"
+    SUPPORTED_LANGUAGES: str = "en,ta,hi,te,kn,ml,mr"
+
+    # Export Settings (Stage 7)
+    DEFAULT_EXPORT_FORMAT: str = "pdf"
+    TEMP_EXPORT_DIRECTORY: str = "temp"
+    REPORT_TITLE: str = "District Court e-Services"
+
 
     model_config = SettingsConfigDict(
         env_file=".env",

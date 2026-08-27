@@ -3,28 +3,30 @@
 ## Overview
 An AI-powered backend service designed to process, parse, chunk, summarize, and translate complex legal documents used in Indian District Court e-Services.
 
-Currently implemented: **Stage 1 (Backend Core & Parsing Infrastructure)**.
+Currently implemented: **Stages 1 - 5 (Backend AI Pipeline & Pan-Indian Multilingual Support)** & **Stage 7 (Professional Report Export in PDF, DOCX, TXT)**.
 
 ---
 
-## Features (Stage 4)
+## Features
 - **Document Parsing API**: Fast, reliable text extraction from PDF and DOCX documents via `POST /upload`.
-- **PyMuPDF Parser**: Page-by-page PDF processing with error resilience for unreadable or corrupted pages.
-- **Python-Docx Parser**: Clean paragraph extraction for Word documents.
-- **Robust Validation**: File extension validation, maximum file size check (100 MB), empty file detection, corrupted file detection, and encrypted PDF detection.
-- **Modular Architecture**: Clean architecture organized into routers, schemas, services, and utilities.
-- **Chunking Scaffolding**: Prepared chunking and token estimation utilities for future AI pipeline stages.
-- **Multilingual Summarization**: Supports English, Tamil, Hindi, Telugu, Kannada, Malayalam, and Marathi document summarization with optional source/target language overrides.
-- **Lightweight Language Detection**: Automatically recognizes supported Indian languages and can be overridden manually when needed.
-- **Translation Pipeline**: Summarizes in the source language first and translates the summary only when the requested target language differs.
+- **PyMuPDF & Python-Docx Parsers**: Page-by-page PDF processing with error resilience for unreadable or encrypted pages.
+- **Intelligent Chunking Engine**: Context-aware legal text chunking with overlap management.
+- **Gemini AI Legal Summarizer**: Powered by Gemini 2.5 Flash Lite with exponential backoff retries.
+- **Pan-Indian Multilingual Support**: Supports 7 languages: **English, Tamil, Hindi, Telugu, Kannada, Malayalam, and Marathi**.
+- **Professional Report Export (Stage 7)**:
+  - **PDF Export**: Built with ReportLab using custom page templates, header banners, metadata tables, dynamic footers ("Page X of Y"), and Indic Unicode font rendering.
+  - **DOCX Export**: Structured Word document built with `python-docx` using heading hierarchies, metadata cards, and styled typography.
+  - **TXT Export**: Clean UTF-8 encoded plain text report.
+  - Dynamic in-memory file generation & streaming (no permanent storage).
 
 ---
 
 ## Tech Stack
 - **Language**: Python 3.12+
-- **Web Framework**: FastAPI
-- **ASGI Server**: Uvicorn
+- **Web Framework**: FastAPI, Uvicorn
 - **Parsing Libraries**: PyMuPDF (`fitz`), `python-docx`
+- **PDF Generation**: ReportLab (`reportlab>=4.0.0`)
+- **Frontend Stack**: React, Vite, Tailwind CSS, Framer Motion, Lucide Icons
 - **Validation & Settings**: Pydantic, `pydantic-settings`
 
 ---
@@ -177,7 +179,9 @@ curl -X 'POST' \
 
 ## Development Roadmap
 - [x] **Stage 1**: Document parsing, validation, chunking scaffolding, and `/upload` endpoint.
-- [x] **Stage 2 (Current)**: Text cleaning, legal pre-processing, and Chunking Engine integration.
-- [ ] **Stage 3**: Gemini LLM summarization pipeline integration.
-- [ ] **Stage 4**: Multilingual translation (English ↔ Tamil).
-- [ ] **Stage 5**: OCR support for scanned documents, PDF generation, persistence, and queue system.
+- [x] **Stage 2**: Text cleaning, legal pre-processing, and Chunking Engine integration.
+- [x] **Stage 3**: Gemini LLM summarization pipeline integration.
+- [x] **Stage 4**: Multilingual translation support.
+- [x] **Stage 5**: Backend AI Pipeline & Pan-Indian Multilingual Support.
+- [ ] **Stage 6**: Frontend Integration and UI Enhancements.
+- [x] **Stage 7**: Professional Report Export in PDF, DOCX, TXT.

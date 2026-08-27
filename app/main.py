@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
 from app.config import settings
-from app.routers import upload, summarize
+from app.routers import upload, summarize, export
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -16,6 +16,7 @@ app = FastAPI(
 # Register routers
 app.include_router(upload.router)
 app.include_router(summarize.router)
+app.include_router(export.router)
 
 app.add_middleware(
     CORSMiddleware,

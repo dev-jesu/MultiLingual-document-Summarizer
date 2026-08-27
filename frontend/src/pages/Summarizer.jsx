@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Download, RefreshCw } from 'lucide-react';
+import { Copy, Download, FileText, RefreshCw } from 'lucide-react';
 import Button from '../components/Button';
 import DocumentInfoCard from '../components/DocumentInfoCard';
 import EmptyState from '../components/EmptyState';
@@ -8,16 +8,26 @@ import ErrorAlert from '../components/ErrorAlert';
 import LanguageSelector from '../components/LanguageSelector';
 import LoadingProgress from '../components/LoadingProgress';
 import SummaryCard from '../components/SummaryCard';
+import Toast from '../components/Toast';
 import UploadZone from '../components/UploadZone';
-import { summarizeDocument } from '../services/api';
+import { summarizeDocument, exportSummary } from '../services/api';
 
 export default function Summarizer() {
   const [file, setFile] = useState(null);
   const [sourceLanguage, setSourceLanguage] = useState('auto');
   const [targetLanguage, setTargetLanguage] = useState('en');
   const [loading, setLoading] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState(null);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (title, message = '', type = 'info', duration = 3500) => {
+    setToast({ title, message, type });
+    if (duration > 0) {
+      setTimeout(() => setToast(null), duration);
+    }
+  };
 
   const handleFileChange = (selectedFile) => {
     setFile(selectedFile);
@@ -49,9 +59,11 @@ export default function Summarizer() {
     try {
       const response = await summarizeDocument(formData);
       setResult(response.data);
+      showToast('Summary Generated', 'Document legal summary is ready.', 'success');
     } catch (err) {
       const message = err?.response?.data?.detail || 'The service is temporarily unavailable. Please try again.';
       setError(message);
+      showToast('Generation Failed', message, 'error');
     } finally {
       setLoading(false);
     }
@@ -61,9 +73,33 @@ export default function Summarizer() {
     if (!result?.summary) return;
     try {
       await navigator.clipboard.writeText(result.summary);
-      setError('');
+      showToast('Copy Summary', 'Summary copied to clipboard successfully.', 'success');
     } catch {
-      setError('Unable to copy summary.');
+      showToast('Copy Failed', 'Unable to copy summary to clipboard.', 'error');
+    }
+  };
+
+  const handleExport = async (format) => {
+    if (!result?.summary) return;
+
+    setExportingFormat(format);
+    showToast('Download Started', `Preparing your ${format.toUpperCase()} report...`, 'info', 2000);
+
+    const payload = {
+      filename: result.filename || file?.name || 'judgement.pdf',
+      summary: result.summary,
+      language: targetLanguage,
+      processing_time: `${result.processing_time_seconds || 0}s`,
+    };
+
+    try {
+      const downloadedName = await exportSummary(format, payload);
+      showToast('Export Successful', `Downloaded ${downloadedName}`, 'success');
+    } catch (err) {
+      const detail = err?.response?.data?.detail || `Failed to export ${format.toUpperCase()} report.`;
+      showToast('Export Failed', detail, 'error');
+    } finally {
+      setExportingFormat(null);
     }
   };
 
@@ -113,14 +149,17 @@ export default function Summarizer() {
                   <SummaryCard summary={result.summary} />
                   <DocumentInfoCard data={result} />
                   <div className="flex flex-wrap gap-3">
+                    <Button onClick={() => handleExport('pdf')} variant="secondary" className="gap-2" disabled={Boolean(exportingFormat)}>
+                      <Download size={16} /> {exportingFormat === 'pdf' ? 'Downloading PDF...' : 'Download PDF'}
+                    </Button>
+                    <Button onClick={() => handleExport('docx')} variant="secondary" className="gap-2" disabled={Boolean(exportingFormat)}>
+                      <Download size={16} /> {exportingFormat === 'docx' ? 'Downloading DOCX...' : 'Download DOCX'}
+                    </Button>
+                    <Button onClick={() => handleExport('txt')} variant="secondary" className="gap-2" disabled={Boolean(exportingFormat)}>
+                      <FileText size={16} /> {exportingFormat === 'txt' ? 'Downloading TXT...' : 'Download TXT'}
+                    </Button>
                     <Button onClick={handleCopy} variant="secondary" className="gap-2">
                       <Copy size={16} /> Copy Summary
-                    </Button>
-                    <Button variant="secondary" className="gap-2" disabled>
-                      <Download size={16} /> Download PDF
-                    </Button>
-                    <Button variant="secondary" className="gap-2" disabled>
-                      <Download size={16} /> Download DOCX
                     </Button>
                     <Button onClick={handleRemove} variant="secondary" className="gap-2">
                       <RefreshCw size={16} /> Upload New Document
@@ -132,6 +171,8 @@ export default function Summarizer() {
           </div>
         </motion.div>
       </div>
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }
