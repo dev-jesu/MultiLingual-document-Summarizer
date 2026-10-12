@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional, Literal
-from fastapi import APIRouter, File, UploadFile, Query, HTTPException, status
+from fastapi import APIRouter, File, UploadFile, Query, HTTPException, status, Depends
+from app.services.auth import get_current_user, CurrentUser
 from app.config import settings
 from app.schemas.upload import DocumentResponse, ChunkDetail, ErrorDetail
 from app.services.parser import parse_pdf, parse_docx
@@ -39,7 +40,8 @@ async def upload_document(
         ge=0,
         le=500,
         description="Token overlap between adjacent chunks"
-    )
+    ),
+    current_user: CurrentUser = Depends(get_current_user)
 ) -> DocumentResponse:
     """
     Handles file upload, text extraction, legal text cleaning, and chunking.

@@ -1,6 +1,7 @@
 from pathlib import Path
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException, status
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException, status, Depends
 from app.config import settings
+from app.services.auth import get_current_user, CurrentUser
 from app.schemas.summary import SummaryResponse
 from app.schemas.upload import ErrorDetail
 from app.services.language_detection import MixedLanguageError, UnsupportedLanguageError, normalize_language_parameters
@@ -25,6 +26,7 @@ async def summarize_document(
     file: UploadFile = File(...),
     source_language: str = Form(default=settings.DEFAULT_SOURCE_LANGUAGE),
     target_language: str = Form(default=settings.DEFAULT_TARGET_LANGUAGE),
+    current_user: CurrentUser = Depends(get_current_user)
 ) -> SummaryResponse:
     """
     Handles file upload, input validation, text extraction, and summarization pipeline.
@@ -67,9 +69,17 @@ async def summarize_document(
     # 1. Parse Document
     try:
         if file_ext == ".pdf":
-            raw_text, pages, _ = parse_pdf(contents)
+            parsed_result = parse_pdf(contents)
+            if len(parsed_result) == 2:
+                raw_text, pages = parsed_result
+            else:
+                raw_text, pages, _ = parsed_result
         elif file_ext == ".docx":
-            raw_text, pages, _ = parse_docx(contents)
+            parsed_result = parse_docx(contents)
+            if len(parsed_result) == 2:
+                raw_text, pages = parsed_result
+            else:
+                raw_text, pages, _ = parsed_result
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

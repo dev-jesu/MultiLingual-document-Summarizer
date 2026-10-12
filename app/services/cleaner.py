@@ -1,5 +1,21 @@
 import re
 
+
+def clean_summary_text(text: str) -> str:
+    """Normalize AI-generated legal summaries for clean display and exports."""
+    if not text:
+        return ""
+
+    cleaned = text.replace("\r\n", "\n").replace("\r", "\n")
+    cleaned = cleaned.replace("**", "")
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    cleaned = re.sub(r"[ \t]+", " ", cleaned)
+    cleaned = re.sub(r" *\n *", "\n", cleaned)
+    cleaned = re.sub(r"\n{2,}", "\n\n", cleaned)
+    cleaned = re.sub(r"\n\s*\n", "\n\n", cleaned)
+    return cleaned.strip()
+
+
 def clean_legal_text(text: str) -> str:
     """
     Cleans extracted legal text by normalizing spaces and line breaks,

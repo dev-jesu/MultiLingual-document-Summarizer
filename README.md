@@ -177,11 +177,30 @@ curl -X 'POST' \
 
 ---
 
+## Demo Login Credentials (Stage 6)
+To log into the District Court e-Services Workspace:
+- **Email:** `advocate@ecourt.gov`
+- **Password:** `Password@123`
+- **Role:** Advocate
+- **Name:** Advocate Ramesh
+
+To start the applications:
+```bash
+# Terminal 1: Backend
+.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+
+# Terminal 2: Frontend
+cd frontend
+npm run dev
+```
+
+---
+
 ## Development Roadmap
 - [x] **Stage 1**: Document parsing, validation, chunking scaffolding, and `/upload` endpoint.
 - [x] **Stage 2**: Text cleaning, legal pre-processing, and Chunking Engine integration.
 - [x] **Stage 3**: Gemini LLM summarization pipeline integration.
 - [x] **Stage 4**: Multilingual translation support.
 - [x] **Stage 5**: Backend AI Pipeline & Pan-Indian Multilingual Support.
-- [ ] **Stage 6**: Frontend Integration and UI Enhancements.
+- [x] **Stage 6**: Frontend Integration and UI Enhancements.
 - [x] **Stage 7**: Professional Report Export in PDF, DOCX, TXT.

@@ -5,19 +5,19 @@ from docx.opc.exceptions import OpcError
 import zipfile
 
 
-def parse_pdf(file_bytes: bytes) -> tuple[str, int]:
+def parse_pdf(file_bytes: bytes) -> tuple[str, int, list[str]]:
     """
     Parses PDF file bytes using PyMuPDF (fitz).
-    
+
     Preserves page order and paragraph spacing, gracefully handles page-level parsing
     errors, detects password protection, and efficiently processes large documents.
-    
+
     Args:
         file_bytes (bytes): Raw bytes of the PDF file.
-        
+
     Returns:
-        tuple[str, int]: A tuple containing (extracted_text, total_page_count).
-        
+        tuple[str, int, list[str]]: (extracted_text, total_page_count, page_texts).
+
     Raises:
         ValueError: If file is empty, corrupted, or password-protected.
     """
@@ -54,18 +54,18 @@ def parse_pdf(file_bytes: bytes) -> tuple[str, int]:
         doc.close()
 
 
-def parse_docx(file_bytes: bytes) -> tuple[str, None, list[str]]:
+def parse_docx(file_bytes: bytes) -> tuple[str, int | None, list[str]]:
     """
     Parses DOCX file bytes using python-docx.
-    
+
     Preserves paragraph order while ignoring headers, footers, images, and tables.
-    
+
     Args:
         file_bytes (bytes): Raw bytes of the DOCX file.
-        
+
     Returns:
-        tuple[str, None, list[str]]: A tuple containing (extracted_text, None, paragraphs).
-        
+        tuple[str, int | None, list[str]]: (extracted_text, None, paragraphs).
+
     Raises:
         ValueError: If file is empty, corrupted, or not a valid DOCX document.
     """

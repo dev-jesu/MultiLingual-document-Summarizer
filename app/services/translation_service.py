@@ -30,7 +30,7 @@ class TranslationService:
             target_language,
             "started",
         )
-        translated = generate_content_with_retry(prompt.format(text=text), text)
+        translated = generate_content_with_retry(prompt, text)
         elapsed = round(time.perf_counter() - start_time, 2)
 
         if not translated or not translated.strip():

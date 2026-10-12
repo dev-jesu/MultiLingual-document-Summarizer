@@ -4,7 +4,7 @@ from typing import Dict, Any, Optional
 from app.config import settings
 from app.utils.logger import logger
 from app.utils.token_estimator import estimate_tokens
-from app.services.cleaner import clean_legal_text
+from app.services.cleaner import clean_legal_text, clean_summary_text
 from app.services.chunking import split_by_paragraph, merge_small_chunks
 from app.services.gemini_service import generate_content_with_retry
 from app.prompts.summary_prompt import build_summary_prompt
@@ -60,7 +60,7 @@ class SummaryService:
             logger.info("Token count within limits. Using single-pass summarization.")
             chunks_processed = 1
             gemini_requests = 1
-            final_summary = generate_content_with_retry(summary_prompt.format(text=cleaned_text), cleaned_text)
+            final_summary = generate_content_with_retry(summary_prompt, cleaned_text)
         else:
             logger.info("Token count exceeds limit. Initiating chunking pipeline.")
 
@@ -77,7 +77,7 @@ class SummaryService:
             chunk_summaries = []
             for i, chunk in enumerate(chunks, 1):
                 logger.info(f"Processing chunk {i}/{chunks_processed}...")
-                chunk_summary = generate_content_with_retry(summary_prompt.format(text=chunk), chunk)
+                chunk_summary = generate_content_with_retry(summary_prompt, chunk)
                 chunk_summaries.append(chunk_summary)
                 gemini_requests += 1
 
@@ -87,7 +87,7 @@ class SummaryService:
                 logger.warning("Combined chunk summaries exceed limit. Performing single-pass fallback.")
 
             logger.info("Combining chunk summaries into final summary.")
-            final_summary = generate_content_with_retry(summary_prompt.format(text=combined_summaries_text), combined_summaries_text)
+            final_summary = generate_content_with_retry(summary_prompt, combined_summaries_text)
             gemini_requests += 1
 
         if detected_language != target_language:
@@ -102,6 +102,8 @@ class SummaryService:
         end_time = time.perf_counter()
         processing_time = round(end_time - start_time, 2)
 
+        cleaned_summary = clean_summary_text(final_summary)
+
         logger.info(
             f"Summarization complete for {filename}. Time: {processing_time}s | API Requests: {gemini_requests}"
         )
@@ -113,5 +115,5 @@ class SummaryService:
             "chunks_processed": chunks_processed,
             "gemini_requests": gemini_requests,
             "processing_time_seconds": processing_time,
-            "summary": final_summary,
+            "summary": cleaned_summary,
         }

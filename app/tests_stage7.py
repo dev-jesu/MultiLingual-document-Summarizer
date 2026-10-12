@@ -1,6 +1,7 @@
 import unittest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.services.cleaner import clean_summary_text
 
 client = TestClient(app)
 
@@ -87,7 +88,14 @@ class TestStage7Export(unittest.TestCase):
 
         res_txt = client.post("/export/txt", json=bad_payload)
         self.assertEqual(res_txt.status_code, 400)
+    def test_clean_summary_text_removes_markdown_bold_formatting(self):
+        raw_summary = "**Final Judgment:** The appeals filed by the MSRTC are dismissed.\n\n**Relief Granted or Denied:** The order is upheld."
 
+        cleaned = clean_summary_text(raw_summary)
+
+        self.assertNotIn("**", cleaned)
+        self.assertIn("Final Judgment: The appeals filed by the MSRTC are dismissed.", cleaned)
+        self.assertIn("Relief Granted or Denied: The order is upheld.", cleaned)
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main()   

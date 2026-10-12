@@ -12,6 +12,13 @@ else:
     logger.warning("GEMINI_API_KEY is not set. API calls will fail.")
 
 
+def render_prompt_with_text(prompt: str, text: str) -> str:
+    """Safely inject document content without triggering Python format parsing errors."""
+    if "{text}" not in prompt:
+        raise ValueError("Prompt template must contain the {text} placeholder.")
+    return prompt.replace("{text}", text)
+
+
 @retry(
     stop=stop_after_attempt(settings.MAX_RETRIES),
     wait=wait_exponential(multiplier=1, min=4, max=60),
@@ -38,7 +45,7 @@ def generate_content_with_retry(prompt: str, text: str) -> str:
         raise ValueError("GEMINI_API_KEY is missing. Please configure it in the environment.")
 
     try:
-        full_prompt = prompt.format(text=text)
+        full_prompt = render_prompt_with_text(prompt, text)
 
         generation_config = types.GenerateContentConfig(
             max_output_tokens=settings.MAX_OUTPUT_TOKENS,

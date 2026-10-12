@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
 from app.config import settings
-from app.routers import upload, summarize, export
+from app.routers import upload, summarize, export, cases, documents, ai, auth, admin
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -17,6 +17,12 @@ app = FastAPI(
 app.include_router(upload.router)
 app.include_router(summarize.router)
 app.include_router(export.router)
+app.include_router(cases.router)
+app.include_router(documents.router)
+app.include_router(ai.router)
+app.include_router(auth.router)
+app.include_router(admin.router)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,7 +33,7 @@ app.add_middleware(
         "http://127.0.0.1:5173"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

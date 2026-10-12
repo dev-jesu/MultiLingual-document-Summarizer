@@ -53,6 +53,27 @@ class TestGenerateContentWithRetry(unittest.TestCase):
         mock_client.models.generate_content.assert_called_once()
 
     @patch("app.services.gemini_service._client")
+    def test_generate_content_handles_braces_in_document_text(self, mock_client):
+        """Curly braces inside legal text should not break prompt interpolation."""
+        from app.services.gemini_service import generate_content_with_retry
+
+        mock_response = MagicMock()
+        mock_response.text = "Summary produced successfully."
+        mock_client.models.generate_content.return_value = mock_response
+
+        with patch("app.services.gemini_service.settings") as mock_settings:
+            mock_settings.GEMINI_API_KEY = "fake-test-key"
+            mock_settings.MODEL_NAME = "gemini-2.5-flash-lite"
+            mock_settings.MAX_OUTPUT_TOKENS = 1024
+
+            legal_text = "The court observed {A} and {B} in favour of the applicant. Section 17(1) was applied."
+            result = generate_content_with_retry("Summarize this:\n{text}", legal_text)
+
+        self.assertEqual(result, "Summary produced successfully.")
+        prompt_sent = mock_client.models.generate_content.call_args.kwargs["contents"]
+        self.assertIn("{A}", prompt_sent)
+
+    @patch("app.services.gemini_service._client")
     def test_generate_content_empty_response_raises(self, mock_client):
         """Empty API response should raise RuntimeError."""
         from app.services.gemini_service import generate_content_with_retry

@@ -61,9 +61,15 @@ export default function Summarizer() {
       setResult(response.data);
       showToast('Summary Generated', 'Document legal summary is ready.', 'success');
     } catch (err) {
-      const message = err?.response?.data?.detail || 'The service is temporarily unavailable. Please try again.';
-      setError(message);
-      showToast('Generation Failed', message, 'error');
+      if (err?.response?.status === 401) {
+        const message = 'Please sign in to use the AI Document Summarizer.';
+        setError(message);
+        showToast('Authentication Required', message, 'error');
+      } else {
+        const message = err?.response?.data?.detail || 'The service is temporarily unavailable. Please try again.';
+        setError(message);
+        showToast('Generation Failed', message, 'error');
+      }
     } finally {
       setLoading(false);
     }

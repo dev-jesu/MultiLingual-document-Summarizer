@@ -40,8 +40,11 @@ dist/
 
 # Logs & Data
 *.log
-uploads/*
-!uploads/.gitkeep
+uploads/
+Case_Documents/
+local_db_state.json
+*.db
+*.sqlite3
 temp/
 cache/
 
